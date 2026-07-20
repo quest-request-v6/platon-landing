@@ -361,7 +361,7 @@
           <div class="v" id="hoursOut">24 ч/мес</div>
           <div class="l">ручной работы логиста в кабинете Платона</div>
         </div>
-        <button class="btn btn-green" onclick="toast('Макет: здесь откроется форма «Получить точный расчёт на почту»')">Получить точный расчёт →</button>
+        <div id="calcLead"><button class="btn btn-green" onclick="calcLeadForm()">Получить точный расчёт →</button></div>
       </div>
     </div>
   </div>
@@ -409,7 +409,7 @@
     <div class="quiz-box" id="quizBox">
       <div class="quiz-progress"><i id="quizBar"></i></div>
       <div id="quizBody"></div>
-      <p class="quiz-note">Это макет: ответы никуда не отправляются.</p>
+      <p class="quiz-note">Перезвоним в течение 15 минут в рабочее время.</p>
     </div>
   </div>
 </section>
@@ -419,9 +419,10 @@
   <div class="wrap">
     <div class="eyebrow" style="text-align:center">Тариф</div>
     <h2>Платон на автопилоте — дешевле одного штрафа</h2>
-    <div class="price">2 500 ₽ <small>за машину в месяц</small></div>
+    <div class="price"><s style="color:#66779a;font-size:.5em;font-weight:400;vertical-align:middle">3 500 ₽</s> 2 500 ₽ <small>за машину в месяц</small></div>
+    <p style="color:#8fa0bc;font-size:14.5px;margin-top:4px">Цена 2 500 ₽ — для парков, подключившихся по итогам бесплатного теста. Это меньше половины одного штрафа Платона.</p>
     <div class="feats">
-      <span>тест-период бесплатно</span>
+      <span>тест-неделя бесплатно</span>
       <span>без замены оборудования</span>
       <span>запуск за 1 день</span>
     </div>
@@ -476,6 +477,7 @@ const QUIZ=[
   {q:'Кто оформляет карты сейчас?',opts:['Логист','Бухгалтер','Сами водители','Как получится']}
 ];
 let step=0;
+const quizAnswers=[];
 function renderQuiz(){
   const body=document.getElementById('quizBody');
   document.getElementById('quizBar').style.width=(step/(QUIZ.length+1)*100+20)+'%';
@@ -483,22 +485,58 @@ function renderQuiz(){
     const q=QUIZ[step];
     body.innerHTML='<div class="quiz-step-label">ВОПРОС '+(step+1)+' ИЗ '+QUIZ.length+'</div>'
       +'<div class="quiz-q">'+q.q+'</div><div class="quiz-opts">'
-      +q.opts.map(o=>'<button type="button" onclick="nextQuiz()">'+o+'</button>').join('')+'</div>';
+      +q.opts.map(o=>'<button type="button" onclick="quizPick(this)">'+o+'</button>').join('')+'</div>';
   }else if(step===QUIZ.length){
     body.innerHTML='<div class="quiz-step-label">ПОСЛЕДНИЙ ШАГ</div>'
       +'<div class="quiz-q">Куда прислать расчёт и доступ к демо?</div>'
       +'<div class="quiz-final">'
-      +'<input type="text" placeholder="Ваше имя" aria-label="Имя">'
-      +'<input type="tel" placeholder="Телефон" aria-label="Телефон">'
-      +'<button class="btn btn-green" type="button" onclick="nextQuiz()">Получить расчёт и демо →</button></div>';
+      +'<input type="text" id="qName" placeholder="Ваше имя" aria-label="Имя">'
+      +'<input type="tel" id="qPhone" placeholder="Телефон" aria-label="Телефон">'
+      +'<button class="btn btn-green" type="button" onclick="submitQuiz(this)">Получить расчёт и демо →</button></div>';
   }else{
     body.innerHTML='<div class="quiz-done"><div class="big">✓</div>'
-      +'<div class="quiz-q">Готово!</div>'
-      +'<p style="color:var(--ink-soft)">В рабочей версии заявка ушла бы менеджеру,<br>а вам — расчёт и доступ к демо.</p>'
-      +'<button class="btn btn-dark" style="margin-top:16px" type="button" onclick="step=0;renderQuiz()">Пройти ещё раз</button></div>';
+      +'<div class="quiz-q">Заявка отправлена!</div>'
+      +'<p style="color:var(--ink-soft)">Перезвоним в течение 15 минут в рабочее время<br>и подготовим расчёт под ваш парк.</p></div>';
   }
 }
-function nextQuiz(){step++;renderQuiz()}
+function quizPick(btn){quizAnswers[step]=btn.textContent;step++;renderQuiz()}
+async function submitQuiz(btn){
+  const name=document.getElementById('qName').value.trim();
+  const phone=document.getElementById('qPhone').value.trim();
+  if(phone.replace(/\D/g,'').length<10){toast('Укажите телефон — без него не сможем перезвонить');return}
+  btn.disabled=true;btn.textContent='Отправляем…';
+  const ok=await sendLead({source:'Квиз',name,phone,details:QUIZ.map((q,i)=>q.q+' — '+(quizAnswers[i]||'—'))});
+  if(ok){step++;renderQuiz()}
+  else{btn.disabled=false;btn.textContent='Получить расчёт и демо →'}
+}
+function calcLeadForm(){
+  document.getElementById('calcLead').innerHTML=
+    '<input type="tel" id="calcPhone" placeholder="Телефон" aria-label="Телефон" style="font-size:16px;font-family:var(--sans);padding:13px 15px;border:1.5px solid #1d2a45;border-radius:10px;background:var(--night);color:#e8eefb;margin-right:10px;margin-bottom:10px">'
+    +'<button class="btn btn-green" onclick="submitCalc(this)">Отправить →</button>';
+  document.getElementById('calcPhone').focus();
+}
+async function submitCalc(btn){
+  const phone=document.getElementById('calcPhone').value.trim();
+  if(phone.replace(/\D/g,'').length<10){toast('Укажите телефон — без него не сможем перезвонить');return}
+  btn.disabled=true;btn.textContent='Отправляем…';
+  const ok=await sendLead({source:'Калькулятор',phone,details:[
+    'Машин в парке: '+fleet.value,
+    'Рейсов в месяц: '+trips.value,
+    'Потери: '+document.getElementById('moneyOut').textContent,
+    'Часы логиста: '+document.getElementById('hoursOut').textContent]});
+  if(ok)document.getElementById('calcLead').innerHTML='<div style="color:var(--green);font-weight:700;font-size:17px">✓ Заявка отправлена — перезвоним в течение 15 минут</div>';
+  else{btn.disabled=false;btn.textContent='Отправить →'}
+}
+async function sendLead(lead){
+  try{
+    const r=await fetch('/api/lead',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(lead)});
+    if(!r.ok)throw new Error('bad status');
+    return true;
+  }catch(e){
+    toast('Не получилось отправить — позвоните нам: 8 800 250-26-10');
+    return false;
+  }
+}
 renderQuiz();
 
 // ── анимированная карта: фабрика (окно в hero + «плеер» в модалке) ──
