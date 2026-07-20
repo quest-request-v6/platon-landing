@@ -495,8 +495,8 @@ function renderQuiz(){
       +'<button class="btn btn-green" type="button" onclick="submitQuiz(this)">Получить расчёт и демо →</button></div>';
   }else{
     body.innerHTML='<div class="quiz-done"><div class="big">✓</div>'
-      +'<div class="quiz-q">Заявка отправлена!</div>'
-      +'<p style="color:var(--ink-soft)">Перезвоним в течение 15 минут в рабочее время<br>и подготовим расчёт под ваш парк.</p></div>';
+      +'<div class="quiz-q">Спасибо за заявку!</div>'
+      +'<p style="color:var(--ink-soft)">Менеджер перезвонит вам в течение 15 минут<br>в рабочее время.</p></div>';
   }
 }
 function quizPick(btn){quizAnswers[step]=btn.textContent;step++;renderQuiz()}
@@ -524,7 +524,7 @@ async function submitCalc(btn){
     'Рейсов в месяц: '+trips.value,
     'Потери: '+document.getElementById('moneyOut').textContent,
     'Часы логиста: '+document.getElementById('hoursOut').textContent]});
-  if(ok)document.getElementById('calcLead').innerHTML='<div style="color:var(--green);font-weight:700;font-size:17px">✓ Заявка отправлена — перезвоним в течение 15 минут</div>';
+  if(ok)document.getElementById('calcLead').innerHTML='<div style="color:var(--green);font-weight:700;font-size:17px">✓ Спасибо! Менеджер перезвонит вам в течение 15 минут</div>';
   else{btn.disabled=false;btn.textContent='Отправить →'}
 }
 async function sendLead(lead){
