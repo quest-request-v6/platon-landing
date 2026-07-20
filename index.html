@@ -63,6 +63,7 @@
 
   /* карточка-«видео» (приём Zoom: зацикленный беззвучный ролик без рамок плеера) */
   .vcard{position:relative;margin:0;aspect-ratio:16/10;background:#0a0f22;border:1px solid #24335a;border-radius:18px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.55)}
+  .vcard video,.player video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
   .vscene{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:26px;text-align:center;opacity:0;transition:opacity .7s ease;pointer-events:none}
   .vscene.on{opacity:1}
   .vscene .big{font-size:clamp(21px,2.5vw,32px);font-weight:800;line-height:1.18;color:#fff;text-wrap:balance}
@@ -239,27 +240,8 @@
         </div>
       </div>
       <div>
-        <figure class="vcard" aria-label="Демонстрация работы платформы">
-          <div class="vscene on">
-            <div class="small">Демо · как это работает</div>
-            <div class="big">Логист больше не сидит<br>в кабинете <span class="g">Платона</span></div>
-          </div>
-          <div class="vscene">
-            <div class="small">Рейсы закрываются картами сами</div>
-            <div class="vlist">
-              <div class="vitem"><b>Иркутск → Красноярск</b><span class="flip"><span class="fa">Выполняется</span><span class="fb">Обработана · 100%</span></span></div>
-              <div class="vitem"><b>Братск → Новосибирск</b><span class="vok">Обработана · 100%</span></div>
-              <div class="vitem"><b>Ангарск → Чита</b><span class="vok">Обработана · 100%</span></div>
-            </div>
-          </div>
-          <div class="vscene">
-            <div class="vmap"><canvas id="vcardMap"></canvas></div>
-            <div class="small over-map">Система видит каждый проезд под рамкой</div>
-          </div>
-          <div class="vscene">
-            <div class="big"><span class="g">0</span> штрафов · <span class="g">0</span> переплат</div>
-            <div class="small">Оплата точно по факту GPS</div>
-          </div>
+        <figure class="vcard" aria-label="Демонстрация работы платформы — запись реального интерфейса">
+          <video id="vcardVideo" src="/demo.webm" autoplay muted loop playsinline></video>
           <button class="vpause" type="button" aria-label="Пауза" onclick="toggleScenes(this)">❚❚</button>
         </figure>
         <div class="legend">
@@ -433,10 +415,10 @@
   <div class="modal-box">
     <button class="modal-close" type="button" aria-label="Закрыть" onclick="closeVideo()">✕</button>
     <div class="player">
-      <canvas id="modalCanvas"></canvas>
+      <video id="modalVideo" src="/demo.webm" muted loop playsinline></video>
       <div class="caption" id="modalCaption"></div>
     </div>
-    <p class="modal-note">Ролик о системе (60 секунд) сейчас записывается — пока показываем живую анимацию.</p>
+    <p class="modal-note">Реальный интерфейс Автоплатона — запись без монтажа.</p>
   </div>
 </div>
 
@@ -620,32 +602,24 @@ function routeAnim(cv,speed){
   return{start,stop};
 }
 routeAnim(document.getElementById('map'),.0016).start();
-routeAnim(document.getElementById('vcardMap'),.004).start();
 
-// ── смена сцен в карточке-«видео» ──
-const vscenes=[...document.querySelectorAll('.vscene')];
-let vsI=0,vsT=null;
-function nextScene(){
-  vscenes[vsI].classList.remove('on');
-  vsI=(vsI+1)%vscenes.length;
-  vscenes[vsI].classList.add('on');
-}
-if(!reducedMotion)vsT=setInterval(nextScene,3800);
+// ── видео-карточка (запись реального интерфейса) ──
+const vcardVideo=document.getElementById('vcardVideo');
+if(reducedMotion)vcardVideo.pause();
 function toggleScenes(btn){
-  if(vsT){clearInterval(vsT);vsT=null;btn.textContent='▶';btn.setAttribute('aria-label','Продолжить')}
-  else{vsT=setInterval(nextScene,3800);btn.textContent='❚❚';btn.setAttribute('aria-label','Пауза')}
+  if(vcardVideo.paused){vcardVideo.play();btn.textContent='❚❚';btn.setAttribute('aria-label','Пауза')}
+  else{vcardVideo.pause();btn.textContent='▶';btn.setAttribute('aria-label','Продолжить')}
 }
 
 // ── модалка с «видео» ──
 const modal=document.getElementById('videoModal');
-const modalAnim=routeAnim(document.getElementById('modalCanvas'),.0016);
+const modalVideo=document.getElementById('modalVideo');
 const CAPS=[
-  'Один пропущенный проезд под рамкой — штраф 5 000 ₽',
   'Все рейсы парка — на одном экране',
+  'Карта рейса: план, факт GPS и рамки Платона',
   'Система сама находит каждый реальный проезд под рамкой',
-  'Один клик — робот оформит карты в кабинете Платона',
-  'Активация — точно к проезду. Ни рубля лишнего',
-  'Платон — на автопилоте'
+  'Один клик «Все с проездом» — выбраны все нужные рамки',
+  'Осталось нажать «Создать МК» — робот оформит карты сам'
 ];
 let capI=0,capT=null;
 function showCap(){
@@ -655,15 +629,16 @@ function showCap(){
 function openVideo(){
   modal.hidden=false;
   document.body.style.overflow='hidden';
-  modalAnim.start();
+  modalVideo.currentTime=0;
+  modalVideo.play();
   capI=0;showCap();
-  capT=setInterval(showCap,3800);
+  capT=setInterval(showCap,7500);
   document.querySelector('.modal-close').focus();
 }
 function closeVideo(){
   modal.hidden=true;
   document.body.style.overflow='';
-  modalAnim.stop();
+  modalVideo.pause();
   clearInterval(capT);
 }
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)closeVideo()});
