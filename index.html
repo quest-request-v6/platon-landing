@@ -177,6 +177,7 @@
   .quiz-opts{display:grid;gap:10px}
   .quiz-opts button{text-align:left;font-size:15.5px;font-family:var(--sans);background:var(--paper);border:1.5px solid var(--line);border-radius:10px;padding:14px 16px;cursor:pointer;transition:border-color .12s,transform .12s}
   .quiz-opts button:hover{border-color:var(--green-deep);transform:translateX(3px)}
+  .quiz-opts button.sel{border-color:var(--green-deep);background:rgba(79,191,54,.1);font-weight:700}
   .quiz-step-label{font-family:var(--mono);font-size:12px;color:var(--ink-soft);margin-bottom:8px;letter-spacing:.1em}
   .quiz-final input{width:100%;font-size:16px;font-family:var(--sans);padding:13px 15px;border:1.5px solid var(--line);border-radius:10px;margin-bottom:12px;background:var(--paper);color:var(--ink)}
   .quiz-final .btn{width:100%}
@@ -350,7 +351,7 @@
         <input type="range" id="fleet" min="3" max="300" value="25">
         <label for="trips">Рейсов в месяц <output id="tripsOut">120</output></label>
         <input type="range" id="trips" min="10" max="2000" value="120" step="10">
-        <p class="calc-note">Оценка: ~12 минут ручного оформления карт на рейс, средний риск штрафов и переплат по картам ~350 ₽ на рейс. Точный расчёт делаем по вашим данным. Цифры в макете — примерные.</p>
+        <p class="calc-note">Оценка: ~12 минут ручного оформления карт и ~350 ₽ рисков штрафов и переплат на один рейс. Расчёт примерный — точные цифры подготовим по данным вашего парка.</p>
       </div>
       <div class="calc-out">
         <div class="stat">
@@ -388,13 +389,6 @@
           <li>Каждый реальный проезд закрыт картой автоматически</li>
           <li>Карты — только там, где машина проехала по факту GPS</li>
         </ul>
-      </div>
-    </div>
-    <div class="quote">
-      <div class="ava">Д</div>
-      <div>
-        <p>«Раньше кабинет Платона был отдельной работой. Теперь система сама показывает, где проехали, и робот всё оформляет — мы только подтверждаем».</p>
-        <div class="who">Руководитель транспортной компании · место для реального отзыва с фото</div>
       </div>
     </div>
   </div>
@@ -442,7 +436,7 @@
       <canvas id="modalCanvas"></canvas>
       <div class="caption" id="modalCaption"></div>
     </div>
-    <p class="modal-note">Макет: вместо анимации здесь будет настоящий ролик 60 сек, записанный в системе по сценарию.</p>
+    <p class="modal-note">Ролик о системе (60 секунд) сейчас записывается — пока показываем живую анимацию.</p>
   </div>
 </div>
 
@@ -467,7 +461,10 @@ function recalc(){
   document.getElementById('moneyOut').textContent=fmt(t*350)+' ₽/мес';
   document.getElementById('hoursOut').textContent=fmt(Math.round(t*12/60))+' ч/мес';
 }
-fleet.addEventListener('input',recalc);trips.addEventListener('input',recalc);recalc();
+function syncTripsToFleet(){trips.value=Math.min(2000,Math.max(10,Math.round(fleet.value*8/10)*10))}
+fleet.addEventListener('input',()=>{syncTripsToFleet();recalc()});
+trips.addEventListener('input',recalc);
+syncTripsToFleet();recalc();
 
 // ── квиз ──
 const QUIZ=[
@@ -499,7 +496,14 @@ function renderQuiz(){
       +'<p style="color:var(--ink-soft)">Менеджер перезвонит вам в течение 15 минут<br>в рабочее время.</p></div>';
   }
 }
-function quizPick(btn){quizAnswers[step]=btn.textContent;step++;renderQuiz()}
+let quizLock=false;
+function quizPick(btn){
+  if(quizLock)return;
+  quizLock=true;
+  btn.classList.add('sel');
+  quizAnswers[step]=btn.textContent;
+  setTimeout(()=>{quizLock=false;step++;renderQuiz()},350);
+}
 async function submitQuiz(btn){
   const name=document.getElementById('qName').value.trim();
   const phone=document.getElementById('qPhone').value.trim();
