@@ -127,8 +127,13 @@ http.createServer((req, res) => {
   if (req.method === 'GET' && req.url === '/health') { res.writeHead(200); return res.end('ok'); }
   const hit = STATIC[(req.url || '/').split('?')[0]];
   if (req.method === 'GET' && hit) {
-    res.writeHead(200, { 'Content-Type': hit[1], 'Cache-Control': 'no-cache' });
-    return fs.createReadStream(path.join(__dirname, hit[0])).pipe(res);
+    const stream = fs.createReadStream(path.join(__dirname, hit[0]));
+    stream.on('error', () => { res.writeHead(404); res.end(); });
+    stream.once('open', () => {
+      res.writeHead(200, { 'Content-Type': hit[1], 'Cache-Control': 'no-cache' });
+      stream.pipe(res);
+    });
+    return;
   }
   res.writeHead(302, { Location: '/' });
   res.end();
