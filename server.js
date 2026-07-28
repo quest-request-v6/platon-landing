@@ -117,6 +117,8 @@ const STATIC = {
   '/index.html': ['index.html', 'text/html; charset=utf-8'],
   '/favicon.svg': ['favicon.svg', 'image/svg+xml'],
   '/demo.webm': ['demo.webm', 'video/webm'],
+  '/robots.txt': ['robots.txt', 'text/plain; charset=utf-8'],
+  '/sitemap.xml': ['sitemap.xml', 'application/xml; charset=utf-8'],
 };
 
 http.createServer((req, res) => {

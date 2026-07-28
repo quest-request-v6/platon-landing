@@ -5,7 +5,68 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Автоплатон — Платон на автопилоте</title>
 <meta name="description" content="Автоплатон: робот сам оформляет и оплачивает маршрутные карты Платона по фактическим проездам GPS. Без штрафов, без переплат, без ручной работы.">
+<link rel="canonical" href="https://platon.qrq.ru/">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://platon.qrq.ru/#org",
+      "name": "Автоплатон",
+      "legalName": "ООО «БОЗОН»",
+      "url": "https://platon.qrq.ru/",
+      "logo": "https://platon.qrq.ru/favicon.svg",
+      "telephone": "+7 800 250-26-10"
+    },
+    {
+      "@type": "Service",
+      "name": "Автоплатон — автоматическое оформление и оплата маршрутных карт «Платон»",
+      "serviceType": "Автоматизация системы «Платон» для грузовых автопарков",
+      "description": "Робот сверяет GPS-треки машин с рамками «Платона», сам оформляет и оплачивает маршрутные карты. Без штрафов за неоплаченный проезд и без переплат за неиспользованные карты.",
+      "provider": { "@id": "https://platon.qrq.ru/#org" },
+      "areaServed": "RU",
+      "offers": {
+        "@type": "Offer",
+        "price": "5000",
+        "priceCurrency": "RUB",
+        "description": "5 000 ₽ за машину в месяц, тест-неделя бесплатно"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Что такое маршрутная карта «Платон» и когда её нужно оформлять?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Маршрутная карта — способ разово оплатить проезд грузовика массой свыше 12 тонн по федеральным трассам в системе «Платон» без бортового устройства. Оформить и оплатить её нужно до проезда рамок контроля — иначе придёт штраф." }
+        },
+        {
+          "@type": "Question",
+          "name": "Можно ли оформлять маршрутные карты «Платона» автоматически?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Да. Автоплатон подключается к GPS-мониторингу парка, сверяет фактический маршрут каждой машины с картой рамок «Платона» и сам оформляет и оплачивает маршрутные карты в личном кабинете — без ручной работы логиста." }
+        },
+        {
+          "@type": "Question",
+          "name": "Как избежать штрафов «Платона» за неоплаченный проезд под рамкой?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Штраф приходит, когда машина прошла рамку без оплаты. Робот Автоплатона видит каждый реальный проезд по GPS-треку и оформляет карту по факту движения, поэтому неоплаченных проездов не остаётся." }
+        },
+        {
+          "@type": "Question",
+          "name": "Подойдёт ли Автоплатон моему автопарку и GPS-мониторингу?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Работаем с распространёнными системами GPS-мониторинга (например, АвтоГраф) без замены оборудования. Подключение занимает один день; сервис обкатан на парке из 125 машин." }
+        },
+        {
+          "@type": "Question",
+          "name": "Сколько стоит автоматизация «Платона»?",
+          "acceptedAnswer": { "@type": "Answer", "text": "5 000 ₽ за машину в месяц. Первая неделя — бесплатный тест на ваших реальных рейсах: робот оформит карты, а вы сравните результат с работой логиста." }
+        }
+      ]
+    }
+  ]
+}
+</script>
 </head>
 <body>
 <style>
@@ -204,6 +265,14 @@
   /* тост-заглушка */
   #toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:13px 22px;border-radius:10px;font-size:14.5px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:99;max-width:90vw;text-align:center}
   #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  /* FAQ */
+  .faq-list{max-width:760px;display:flex;flex-direction:column;gap:10px;margin-top:26px}
+  .faq-item{background:var(--paper);border:1px solid var(--line);border-radius:12px}
+  .faq-item summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:16px 20px;font-weight:700;font-size:16.5px}
+  .faq-item summary::-webkit-details-marker{display:none}
+  .faq-item summary::after{content:"+";font-family:var(--mono);color:var(--green-deep);font-size:20px;flex:none}
+  .faq-item[open] summary::after{content:"–"}
+  .faq-item p{padding:0 20px 16px;color:var(--ink-soft)}
 </style>
 
 <header>
@@ -386,6 +455,36 @@
       <div class="quiz-progress"><i id="quizBar"></i></div>
       <div id="quizBody"></div>
       <p class="quiz-note">Перезвоним в течение 15 минут в рабочее время.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ЭКРАН 6.5 · ВОПРОСЫ И ОТВЕТЫ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="eyebrow">Вопросы и ответы</div>
+    <h2 class="sec">Про «Платон», маршрутные карты и робота</h2>
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary>Что такое маршрутная карта «Платон» и когда её нужно оформлять?</summary>
+        <p>Маршрутная карта — способ разово оплатить проезд грузовика массой свыше 12 тонн по федеральным трассам в системе «Платон» без бортового устройства. Оформить и оплатить её нужно до проезда рамок контроля — иначе придёт штраф.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Можно ли оформлять маршрутные карты «Платона» автоматически?</summary>
+        <p>Да. Автоплатон подключается к GPS-мониторингу парка, сверяет фактический маршрут каждой машины с картой рамок «Платона» и сам оформляет и оплачивает маршрутные карты в личном кабинете — без ручной работы логиста.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Как избежать штрафов «Платона» за неоплаченный проезд под рамкой?</summary>
+        <p>Штраф приходит, когда машина прошла рамку без оплаты. Робот Автоплатона видит каждый реальный проезд по GPS-треку и оформляет карту по факту движения, поэтому неоплаченных проездов не остаётся.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Подойдёт ли Автоплатон моему автопарку и GPS-мониторингу?</summary>
+        <p>Работаем с распространёнными системами GPS-мониторинга (например, АвтоГраф) без замены оборудования. Подключение занимает один день; сервис обкатан на парке из 125 машин.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Сколько стоит автоматизация «Платона»?</summary>
+        <p>5 000 ₽ за машину в месяц. Первая неделя — бесплатный тест на ваших реальных рейсах: робот оформит карты, а вы сравните результат с работой логиста.</p>
+      </details>
     </div>
   </div>
 </section>

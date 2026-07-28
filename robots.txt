@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://platon.qrq.ru/sitemap.xml
